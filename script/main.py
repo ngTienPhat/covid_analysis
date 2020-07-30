@@ -1,19 +1,38 @@
 import os
-import default_config
-import data
 import pandas as pd
-#from default_config import get_default_config
-from data.eda import distribution_active_cases
 
-import sys
-print('\n'.join(sys.path))
+from model import TimeSIR
+from data_utils import train_test_split, prepare_data
+from default_config import get_default_config
 
-def main():
-    # os.chdir(default_config.CWD)
-    texas_df = pd.read_csv(os.path.join(default_config.DATA_ROOT, 'Texas.csv'))
-    distribution_active_cases(texas_df)
+STATE = "Texas"
 
+def main(cfg):
+    data_dir = os.path.join(cfg.cwd, cfg.data.root)
+    file_dir = os.path.join(data_dir, STATE+'.csv')
+    
+    raw_df = pd.read_csv(file_dir)
+
+    train_df, val_df = train_test_split(raw_df, 0.1)
+    cfg.model.predict_day = len(val_df)
+
+    train_params = prepare_data(train_df['Active'].values, 
+                                    train_df['Confirmed'].values,
+                                    train_df['Deaths'].values,
+                                    train_df['Recovered'].values,
+                                    cfg.population.texas)
+
+    val_parms = prepare_data(val_df['Active'].values, 
+                                    val_df['Confirmed'].values,
+                                    val_df['Deaths'].values,
+                                    val_df['Recovered'].values,
+                                    cfg.population.texas)
+
+    model = TimeSIR(cfg, **train_params)
+    model.train()
+    model.predict(val_parms)
+    
 
 if __name__ == "__main__":
-    #cfg = get_default_config()
-    main()
+    cfg = get_default_config()
+    main(cfg)
