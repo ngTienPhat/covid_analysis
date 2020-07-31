@@ -25,8 +25,8 @@ def get_default_config():
 
     cfg.model=CN()
     # Learning params:
-    cfg.model.orders_beta = 3
-    cfg.model.orders_gamma = 3
+    cfg.model.orders_beta = 2
+    cfg.model.orders_gamma = 2
 
     cfg.model.start_beta = 10
     cfg.model.start_gamma = 10

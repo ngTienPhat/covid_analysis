@@ -25,23 +25,23 @@ def ridge(x, y):
 class TimeSIR(object):
     def __init__(self, cfg, **kwargs):
         self.linear_models = dict()
-        # self.linear_models['beta'] = Ridge(alpha=0.003765, 
-        #                         copy_X=True, 
-        #                         fit_intercept=False,
-        #                         max_iter=None, 
-        #                         normalize=True, 
-        #                         random_state=None, 
-        #                         solver='auto', 
-        #                         tol=1e-08)
+        self.linear_models['beta'] = Ridge(alpha=0.003765, 
+                                copy_X=True, 
+                                fit_intercept=False,
+                                max_iter=None, 
+                                normalize=True, 
+                                random_state=None, 
+                                solver='auto', 
+                                tol=1e-08)
 
-        # self.linear_models['gamma'] = Ridge(alpha=0.003765, 
-        #                         copy_X=True, 
-        #                         fit_intercept=False,
-        #                         max_iter=None, 
-        #                         normalize=True, 
-        #                         random_state=None, 
-        #                         solver='auto', 
-        #                         tol=1e-08)
+        self.linear_models['gamma'] = Ridge(alpha=0.003765, 
+                                copy_X=True, 
+                                fit_intercept=False,
+                                max_iter=None, 
+                                normalize=True, 
+                                random_state=None, 
+                                solver='auto', 
+                                tol=1e-08)
 
         self.cfg = cfg
         self.n = kwargs['population']
@@ -55,8 +55,8 @@ class TimeSIR(object):
         self.x_gamma, self.y_gamma = data_split(self.gamma, cfg.model.orders_gamma, cfg.model.start_gamma)
 
     def fit_linear(self, X, y, variable="gamma"):
-        # self.linear_models[variable].fit(X, y)
-        self.linear_models[variable] = ridge(X, y)
+        self.linear_models[variable].fit(X, y)
+        # self.linear_models[variable] = ridge(X, y)
 
     def evaluate_linear(self, X_test, y_test, variable="gamma"):
         y_hat = self.linear_models[variable].predict(X_test)
@@ -105,13 +105,23 @@ class TimeSIR(object):
 
             cnt_day += 1
 
+        result = {
+            "S_pred": S_pred[1:],
+            "I_pred": I_pred[1:],
+            "R_pred": R_pred[1:],
+            "turning_point": turning_point
+        }
 
-        plt.plot(range(len(I_pred)-1), I_pred[1:], '*-', label=r'$\hat{I}(t)$', color='darkorange')
-        plt.plot(range(len(I_pred)-1), R_pred[1:], '*-', label=r'$\hat{R}(t)$', color='limegreen')
-        plt.plot(range(len(val_params['I'])), val_params['I'], '--', label=r'$I(t)$', color='chocolate')
-        plt.plot(range(len(val_params['I'])), val_params['R'], '--', label=r'$R(t)$', color='darkgreen')
-        plt.xlabel('Day')
-        plt.ylabel('Person')
-        plt.title('Time evolution of the time-dependent SIR model.')
-        plt.legend()
-        plt.show()
+        return result
+
+        # plt.plot(range(len(I_pred)-1), I_pred[1:], '*-', label=r'$\hat{I}(t)$', color='darkorange')
+        # plt.plot(range(len(I_pred)-1), R_pred[1:], '*-', label=r'$\hat{R}(t)$', color='limegreen')
+        # plt.plot(range(len(val_params['I'])), val_params['I'], '--', label=r'$I(t)$', color='chocolate')
+        # plt.plot(range(len(val_params['I'])), val_params['R'], '--', label=r'$R(t)$', color='darkgreen')
+        # plt.xlabel('Day')
+        # plt.ylabel('Person')
+        # plt.title('Time evolution of the time-dependent SIR model.')
+        # plt.legend()
+        # plt.show()
+
+

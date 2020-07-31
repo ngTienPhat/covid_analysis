@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def train_test_split(df, test_size=0.2):
     total_day = len(df) 
@@ -32,3 +33,28 @@ def prepare_data(arr_active, arr_confirm, arr_death, arr_recover, population):
         'I': I, 'R': R, 'S': S, 'gamma': gamma, 'beta': beta, 'population' : population
     }
     return params
+
+def visualize_result(all_params, pred_result):
+    I_pred = pred_result['I_pred']
+    R_pred = pred_result['R_pred']
+    n_pred = len(I_pred)
+
+    I_all = all_params['I']
+    R_all = all_params['R']
+    n = len(I_all)
+
+
+    # Plot all value:
+    plt.plot(range(n), I_all, '--', label=r'$I(t)$', color='darkorange')
+    plt.plot(range(n), R_all, '--', label=r'$R(t)$', color='limegreen')
+
+    plt.plot(range(n-n_pred, n), I_pred, '--+', label=r'$\hat{I}(t)$', color='red')
+    plt.plot(range(n-n_pred, n), R_pred, '--+', label=r'$\hat{R}(t)$', color='blue')
+
+
+   
+    plt.xlabel('Day')
+    plt.ylabel('Person')
+    plt.title('Time evolution of the time-dependent SIR model.')
+    plt.legend()
+    plt.show()
