@@ -58,3 +58,21 @@ def visualize_result(all_params, pred_result):
     plt.title('Time evolution of the time-dependent SIR model.')
     plt.legend()
     plt.show()
+
+
+def plot_single_set(set_params):
+    I = set_params['I']
+    R = set_params['R']
+
+    S = np.log(np.array(set_params['S']))
+    # print(S[:10])
+    n = len(I)
+
+    plt.plot(range(n), I, '--', label=r'$I(t)$', color='darkorange')
+    plt.plot(range(n), R, '--', label=r'$R(t)$', color='limegreen')
+    # plt.plot(range(n), S, '--', label=r'$S(t)$', color='blue')
+
+    plt.xlabel('Day')
+    plt.ylabel('Person')
+    plt.legend()
+    plt.show()

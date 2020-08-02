@@ -1,10 +1,12 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
-
-from data_utils import data_split
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GridSearchCV
+
+
+from default_model import BaseModel
+from data_utils import data_split
 
 def ridge(x, y):
     print('\nStart searching good parameters for the task...')
@@ -22,8 +24,10 @@ def ridge(x, y):
 
     return clf
 
-class TimeSIR(object):
-    def __init__(self, cfg, **kwargs):
+
+class TimeSIR(BaseModel):
+    def __init__(self, cfg, params):
+        super(TimeSIR, self).__init__(cfg, params)
         self.linear_models = dict()
         self.linear_models['beta'] = Ridge(alpha=0.003765, 
                                 copy_X=True, 
@@ -43,13 +47,8 @@ class TimeSIR(object):
                                 solver='auto', 
                                 tol=1e-08)
 
-        self.cfg = cfg
-        self.n = kwargs['population']
-        self.S = kwargs['S']
-        self.I = kwargs['I']
-        self.R = kwargs['R']
-        self.beta = kwargs['beta']
-        self.gamma = kwargs['gamma']
+        self.beta = params['beta']
+        self.gamma = params['gamma']
 
         self.x_beta, self.y_beta = data_split(self.beta, cfg.model.orders_beta, cfg.model.start_beta)
         self.x_gamma, self.y_gamma = data_split(self.gamma, cfg.model.orders_gamma, cfg.model.start_gamma)
@@ -93,7 +92,8 @@ class TimeSIR(object):
             next_gamma = max(next_gamma, 0)
 
             next_S = ((-next_beta * S_pred[-1] * I_pred[-1])/self.n) + S_pred[-1]
-            next_I = (1+next_beta-next_gamma)*I_pred[-1]
+            # next_I = (1+next_beta-next_gamma)*I_pred[-1]
+            next_I = next_beta*S_pred[-1]*I_pred[-1]/self.n - next_gamma*I_pred[-1] + I_pred[-1]
             next_R = R_pred[-1] + next_gamma*I_pred[-1]
 
             S_pred.append(next_S)
@@ -123,5 +123,3 @@ class TimeSIR(object):
         # plt.title('Time evolution of the time-dependent SIR model.')
         # plt.legend()
         # plt.show()
-
-
