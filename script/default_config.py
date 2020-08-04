@@ -12,7 +12,9 @@ def get_default_config():
     cfg.data.root = "dataset/csse_combine_state"    
 
     cfg.population = CN()
-    # population
+
+    # -----------------------POPULATION--------------------------------
+    # US
     cfg.population.texas = 29087070
     cfg.population.california = 39747267
     cfg.population.florida = 21646155
@@ -23,6 +25,10 @@ def get_default_config():
     cfg.population.georgia = 10627767
     cfg.population.michigan = 10020472
 
+    # CHINA
+
+
+    # -----------------------Time_SIR--------------------------------
     cfg.model=CN()
     # Learning params:
     cfg.model.orders_beta = 2

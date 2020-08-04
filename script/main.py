@@ -2,20 +2,77 @@ import os
 import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
+
+from scipy import integrate, optimize
+from sklearn.metrics import mean_squared_error
 
 from time_sir import TimeSIR
 from data_utils import train_test_split, prepare_data, visualize_result, plot_single_set
 from default_config import get_default_config
-from scipy import integrate, optimize
-import warnings
-warnings.filterwarnings('ignore')
+from basic_sir import BasicSIR
 
-from sklearn.metrics import mean_squared_error
+cfg = get_default_config()
+
+def load_data(test_size=0.1):
+    STATE = "Texas"
+    data_dir = os.path.join(cfg.cwd, cfg.data.root)
+    file_dir = os.path.join(data_dir, STATE+'.csv')
+
+    raw_df = pd.read_csv(file_dir)
+    train_df, val_df = train_test_split(raw_df, test_size)
+    cfg.model.predict_day = len(val_df)
+
+    return train_df, val_df, raw_df
 
 
-STATE = "Texas"
+def test_time_SIR(train_df, val_df, raw_df):
+    train_params = prepare_data(train_df['Active'].values, 
+                                    train_df['Confirmed'].values,
+                                    train_df['Deaths'].values,
+                                    train_df['Recovered'].values,
+                                    cfg.population.texas)
+
+    val_parms = prepare_data(val_df['Active'].values, 
+                                    val_df['Confirmed'].values,
+                                    val_df['Deaths'].values,
+                                    val_df['Recovered'].values,
+                                    cfg.population.texas)
+    
+    raw_params = prepare_data(raw_df['Active'].values, 
+                                    raw_df['Confirmed'].values,
+                                    raw_df['Deaths'].values,
+                                    raw_df['Recovered'].values,
+                                    cfg.population.texas)
+
+    model = TimeSIR(cfg, train_params)
+    model.train()
+    res = model.predict(val_parms)
+    visualize_result(raw_params, res)
+
+    plot_single_set(raw_params)
+
+
+def test_basic_SIR(raw_df, attribute2fix: str):
+    '''
+        attribute2fix: ['I', 'R']
+    '''
+
+    raw_params = prepare_data(raw_df['Active'].values, 
+                                    raw_df['Confirmed'].values,
+                                    raw_df['Deaths'].values,
+                                    raw_df['Recovered'].values,
+                                    cfg.population.texas)
+    
+    basic_sir = BasicSIR(cfg, raw_params)
+    basic_sir.fit_single_attribute(attribute='R', visualize=True)
+
 
 def main(cfg):
+
+    # -----------------------------------------------------------
+    # TIME SIR:
     data_dir = os.path.join(cfg.cwd, cfg.data.root)
     file_dir = os.path.join(data_dir, STATE+'.csv')
     
@@ -52,50 +109,17 @@ def main(cfg):
 
     # -----------------------------------------------------------
     # BASIC SIR:
-    N = raw_params['population']
-    I = raw_params['I']
-    S = raw_params['S']
-    R = raw_params['R']
-    
-    I0 = I[0]
-    S0 = S[0]
-    R0 = R[0]
-    x = np.arange(len(I))
 
-    def sir_model(f, x, beta, gamma):
-        s0, i0, r0 = f
-        s = -beta*s0*i0/N 
-        r = gamma*i0 
-        i = -(s + r)
-        return s, i, r
-    
-    def fit_odeint(x, beta, gamma):
-        return integrate.odeint(sir_model, (S0, I0, R0), x, 
-                                args=(beta, gamma))[:, 2]
-
-    popt, pcov = optimize.curve_fit(fit_odeint, x, R)
-    
-    beta, gamma = popt
-    print(f"beta: {beta}, gamma: {gamma}")
-    
-    # I_pred = fit_odeint(x, beta, gamma)
-    R_pred = fit_odeint(x, beta, gamma)
-    #S_pred = fit_odeint(x, beta, gamma, "suspected")
-    # R_pred = integrate.odeint(sir_model, (S0, I0, R0), x, args=(beta, gamma))[:, 2]
-    I_pred = integrate.odeint(sir_model, (S0, I0, R0), x, args=(beta, gamma))[:, 1]
-
-    plt.plot(x, I, label='$I(t)$', color='orange')
-    plt.plot(x, I_pred, label='$\hat{I}(t)$', color='blue')
-
-    plt.plot(x, R, label='$R(t)$', color='limegreen')
-    plt.plot(x, R_pred, label='$\hat{R}(t)$', color='red')
-
-    plt.legend()
-    plt.show()
-
-    
+    basic_sir = BasicSIR(cfg, raw_params)
+    basic_sir.fit_single_attribute(attribute='R', visualize=True)
 
 
 if __name__ == "__main__":
-    cfg = get_default_config()
-    main(cfg)
+    train_df, val_df, raw_df = load_data()
+    
+    ## A. test time-SIR 
+    # test_time_SIR(train_df, val_df, raw_df)
+
+    ## B. test basic SIR with curve fit:
+    # test_basic_SIR('I')
+    test_basic_SIR(raw_df, 'R')
