@@ -33,9 +33,11 @@ def get_default_config():
     # Learning params:
     cfg.model.orders_beta = 2
     cfg.model.orders_gamma = 2
+    cfg.model.orders_delta = 2
 
     cfg.model.start_beta = 10
     cfg.model.start_gamma = 10
+    cfg.model.start_delta = 10
     
     cfg.model.predict_day = 20 #max day to predict, W in the paper
 
