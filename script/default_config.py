@@ -4,7 +4,7 @@ def get_default_config():
     cfg = CN() 
 
     # working directory
-    cfg.cwd = "/Users/tienphat/Documents/HCMUS/Statistic_Application/covid_analysis"
+    cfg.cwd = "/Users/tienphat/Documents/HCMUS/Statistic_Application/project/covid_analysis"
 
     cfg.data = CN()
     

@@ -59,7 +59,6 @@ def visualize_result(all_params, pred_result):
     plt.legend()
     plt.show()
 
-
 def plot_single_set(set_params):
     I = set_params['I']
     R = set_params['R']
@@ -76,3 +75,5 @@ def plot_single_set(set_params):
     plt.ylabel('Person')
     plt.legend()
     plt.show()
+
+
