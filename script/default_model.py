@@ -5,4 +5,5 @@ class BaseModel(object):
         self.S = params['S']
         self.I = params['I']
         self.R = params['R']
+        self.D = params['D']
         
