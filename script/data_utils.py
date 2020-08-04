@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,31 +19,54 @@ def data_split(x, orders, start):
     
     return x_train, y_train
 
-def prepare_data(arr_active, arr_confirm, arr_death, arr_recover, population):
+def prepare_data(arr_active, arr_confirm, arr_death, arr_recover, population, is_have_death):
     pops = np.array(len(arr_active)*[population], dtype=np.float)
 
-    I = arr_confirm - arr_recover - arr_death
-    R = arr_recover + arr_death
-    S = pops - I - R 
-
-    gamma = (R[1:] - R[:-1])/I[:-1]
-    beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1]) / (I[:-1]*S[:-1])
-
-
+    I, R, D, S, gamma, beta, delta = 0, 0, 0, 0, 0, 0, 0
+  
+    if is_have_death:
+        I = arr_confirm - arr_recover - arr_death
+        R = arr_recover
+        D = arr_death
+        S = pops - I - R - D
+        gamma = (R[1:] - R[:-1])/I[:-1]
+        beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1]) / (I[:-1]*S[:-1])
+        delta = (D[1:] - D[:-1])/I[:-1]
+    else:
+        I = arr_confirm - arr_recover - arr_death
+        R = arr_recover + arr_death
+        D = 0
+        S = pops - I - R - D
+        gamma = (R[1:] - R[:-1])/I[:-1]
+        beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1]) / (I[:-1]*S[:-1])
+        delta = 0
+  
     params = {
-        'I': I, 'R': R, 'S': S, 'gamma': gamma, 'beta': beta, 'population' : population
+        'I': I, 'R': R, 'S': S, 'gamma': gamma, 'beta': beta, 'population' : population, 'D': D, 'delta': delta
     }
     return params
 
-def visualize_result(all_params, pred_result):
+def visualize_result(all_params, pred_result, is_have_death = False, log = False, 
+  is_print = False, output_path = None):
     I_pred = pred_result['I_pred']
     R_pred = pred_result['R_pred']
+    D_pred = pred_result['D_pred']
     n_pred = len(I_pred)
 
     I_all = all_params['I']
     R_all = all_params['R']
+    D_all = all_params['D']
     n = len(I_all)
 
+    if log:
+      D_pred = np.log(D_pred)
+      I_pred = np.log(I_pred)
+      R_pred = np.log(R_pred)
+      
+      I_all = np.log(I_all)
+      R_all = np.log(R_all)
+      D_all = np.log(D_all)
+    
 
     # Plot all value:
     plt.plot(range(n), I_all, '--', label=r'$I(t)$', color='darkorange')
@@ -51,13 +75,23 @@ def visualize_result(all_params, pred_result):
     plt.plot(range(n-n_pred, n), I_pred, '--+', label=r'$\hat{I}(t)$', color='red')
     plt.plot(range(n-n_pred, n), R_pred, '--+', label=r'$\hat{R}(t)$', color='blue')
 
+    if is_have_death:
+        plt.plot(range(n), D_all, '--', label=r'$D(t)$', color='black')
+        plt.plot(range(n-n_pred, n), D_pred, '--+', label=r'$\hat{D}(t)$', color='purple')
+        
 
-   
+
     plt.xlabel('Day')
     plt.ylabel('Person')
     plt.title('Time evolution of the time-dependent SIR model.')
     plt.legend()
-    plt.show()
+    if is_print:
+        if not os.path.exists('../res/'):
+          os.makedirs('../res/')
+        plt.savefig('../res/' + output_path)
+        plt.clf()
+    else:
+        plt.show()
 
 
 def plot_single_set(set_params):
