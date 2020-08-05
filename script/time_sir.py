@@ -77,7 +77,7 @@ class TimeSIR(BaseModel):
         I_pred = [self.I[-1]]
         pred_beta = np.array(self.beta[-cfg.model.orders_beta:])
         pred_gamma = np.array(self.gamma[-cfg.model.orders_gamma:])
-
+        
         cnt_day = 0
         turning_point = 0
         
@@ -88,8 +88,8 @@ class TimeSIR(BaseModel):
             next_beta = self.linear_models['beta'].predict(pred_beta[-cfg.model.orders_beta:].reshape((1,-1)))[0]
             next_gamma = self.linear_models['gamma'].predict(pred_gamma[-cfg.model.orders_gamma:].reshape((1,-1)))[0]
     
-            next_beta = max(next_beta, 0)
-            next_gamma = max(next_gamma, 0)
+            next_beta = max(next_beta, 0.001)
+            next_gamma = max(next_gamma, 0.001)
 
             next_S = ((-next_beta * S_pred[-1] * I_pred[-1])/self.n) + S_pred[-1]
             # next_I = (1+next_beta-next_gamma)*I_pred[-1]
@@ -100,15 +100,18 @@ class TimeSIR(BaseModel):
             I_pred.append(next_I)
             R_pred.append(next_R)
 
-            np.insert(pred_beta, -1, next_beta)
-            np.insert(pred_gamma, -1, next_gamma)
+            pred_beta = np.insert(pred_beta, len(pred_beta), next_beta)
+            pred_gamma = np.insert(pred_gamma, len(pred_gamma), next_gamma)
 
             cnt_day += 1
+
 
         result = {
             "S_pred": S_pred[1:],
             "I_pred": I_pred[1:],
             "R_pred": R_pred[1:],
+            "beta_pred": pred_beta[cfg.model.orders_beta:-1],
+            "gamma_pred": pred_gamma[cfg.model.orders_gamma:-1],
             "turning_point": turning_point
         }
 

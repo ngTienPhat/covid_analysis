@@ -19,6 +19,16 @@ def data_split(x, orders, start):
     
     return x_train, y_train
 
+list_delims = ['-', '/']
+def remove_year(full_date):
+    day_month = None
+    for delim in list_delims:
+        if delim in full_date:
+            day_month = full_date.split(delim)[:-1]
+            res = '/'.join(day_month)
+            break
+    return res
+
 def prepare_data(arr_confirm, arr_death, arr_recover, population, is_have_death=False):
     pops = np.array(len(arr_confirm)*[population], dtype=np.float)
 
@@ -31,7 +41,7 @@ def prepare_data(arr_confirm, arr_death, arr_recover, population, is_have_death=
         S = pops - I - R - D
         
         gamma = (R[1:] - R[:-1])/I[:-1]
-        beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1] + D[1:] - D[:-1]) / (I[:-1]*S[:-1])
+        beta = population*(S[:-1]-S[1:]) / (I[:-1]*S[:-1])
         delta = (D[1:] - D[:-1])/I[:-1]
     else:
         I = arr_confirm - arr_recover - arr_death
@@ -39,7 +49,7 @@ def prepare_data(arr_confirm, arr_death, arr_recover, population, is_have_death=
         D = 0
         S = pops - I - R - D
         gamma = (R[1:] - R[:-1])/I[:-1]
-        beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1]) / (I[:-1]*S[:-1])
+        beta = population*(S[:-1]-S[1:]) / (I[:-1]*S[:-1])
         delta = 0
     
 
@@ -49,7 +59,7 @@ def prepare_data(arr_confirm, arr_death, arr_recover, population, is_have_death=
     return params
 
 def visualize_result(all_params, pred_result, is_have_death = False, log = False, 
-  is_print = False, output_path = None):
+  is_print = False, output_path = None, x_axis=None):
     I_pred = pred_result['I_pred']
     R_pred = pred_result['R_pred']
     if is_have_death:
@@ -60,6 +70,12 @@ def visualize_result(all_params, pred_result, is_have_death = False, log = False
     R_all = all_params['R']
     D_all = all_params['D']
     n = len(I_all)
+
+    X = None 
+    if x_axis is None:
+        X = np.arange(n)
+    else:
+        X = x_axis
 
     if log:
       D_pred = np.log(D_pred)
@@ -72,17 +88,16 @@ def visualize_result(all_params, pred_result, is_have_death = False, log = False
     
 
     # Plot all value:
-    plt.plot(range(n), I_all, '--', label=r'$I(t)$', color='darkorange')
-    plt.plot(range(n), R_all, '--', label=r'$R(t)$', color='limegreen')
+    plt.plot(X[range(n)], I_all, '--', label=r'$I(t)$', color='darkorange')
+    plt.plot(X[range(n)], R_all, '--', label=r'$R(t)$', color='limegreen')
 
-    plt.plot(range(n-n_pred, n), I_pred, '--+', label=r'$\hat{I}(t)$', color='red')
-    plt.plot(range(n-n_pred, n), R_pred, '--+', label=r'$\hat{R}(t)$', color='blue')
+    plt.plot(X[range(n-n_pred, n)], I_pred, '--+', label=r'$\hat{I}(t)$', color='red')
+    plt.plot(X[range(n-n_pred, n)], R_pred, '--+', label=r'$\hat{R}(t)$', color='blue')
 
     if is_have_death:
-        plt.plot(range(n), D_all, '--', label=r'$D(t)$', color='black')
-        plt.plot(range(n-n_pred, n), D_pred, '--+', label=r'$\hat{D}(t)$', color='purple')
+        plt.plot(X[range(n)], D_all, '--', label=r'$D(t)$', color='black')
+        plt.plot(X[range(n-n_pred, n)], D_pred, '--+', label=r'$\hat{D}(t)$', color='purple')
         
-
 
     plt.xlabel('Day')
     plt.ylabel('Person')

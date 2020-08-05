@@ -10,10 +10,10 @@ from sklearn.metrics import mean_squared_error
 
 from time_sir import TimeSIR
 from time_sird import TimeSIRD
-from data_utils import train_test_split, prepare_data, visualize_result, plot_single_set
+from data_utils import train_test_split, prepare_data, visualize_result, plot_single_set, remove_year
 from default_config import get_default_config, population
 from basic_sir import BasicSIR
-from visualize_utils import visualize_error_rate
+from visualize_utils import visualize_all_result
 
 cfg = get_default_config()
 
@@ -23,6 +23,8 @@ def load_data(test_size=0.1, country='US', STATE = "Texas"):
     file_dir = os.path.join(data_dir, STATE+'.csv')
 
     raw_df = pd.read_csv(file_dir)
+    raw_df['Day'] = raw_df['Day'].apply(remove_year)
+
     train_df, val_df = train_test_split(raw_df, test_size)
     cfg.model.predict_day = len(val_df)
     
@@ -53,10 +55,9 @@ def test_time_SIR(train_df, val_df, raw_df, state = "Texas", country='US'):
     model = TimeSIR(cfg, train_params)
     model.train()
     res = model.predict(val_params)
-    visualize_result(raw_params, res)
-    visualize_error_rate(val_params, res)
+    visualize_result(raw_params, res, x_axis=None, log=True)
+    visualize_all_result(val_params, res, x_axis=val_df['Day'].values)
 
-    #plot_single_set(raw_params)
 
 
 def test_time_SIRD(train_df, val_df, raw_df, STATE = "Texas", country='US'):
@@ -65,9 +66,8 @@ def test_time_SIRD(train_df, val_df, raw_df, STATE = "Texas", country='US'):
     model = TimeSIRD(cfg, train_params)
     model.train()
     res = model.predict(val_params)
-    visualize_result(raw_params, res, is_have_death = True, log = True, is_print = True, output_path = 'timeSIRD_'+ STATE +'.png')
-    visualize_error_rate(val_params, res)
-    #plot_single_set(raw_params)
+    visualize_result(raw_params, res, is_have_death = True, log = True, is_print = False, output_path = 'timeSIRD_'+ STATE +'.png')
+    visualize_all_result(val_params, res, x_axis=val_df['Day'].values)
 
 
 def test_basic_SIR(raw_df, attribute2fix: str, state='Texas', country='US'):
@@ -95,6 +95,7 @@ if __name__ == "__main__":
     country = 'US'
     state = 'Texas'
     train_df, val_df, raw_df = load_data(country=country, STATE = state)
+    
     raw_params = prepare_data(
         raw_df['Confirmed'].values,
         raw_df['Deaths'].values,
@@ -104,7 +105,13 @@ if __name__ == "__main__":
     
     print(f'test on {state}')
     plot_single_set(raw_params)
-    test_time_SIR(train_df, val_df, raw_df, state, country)
+    # test_time_SIR(train_df, val_df, raw_df, state, country)
+    test_time_SIRD(train_df, val_df, raw_df, state, country)
+    # test_basic_SIR(raw_df, 'R')
+
+
+
+
     ## A. test time-SIR 
     # test_time_SIR(train_df, val_df, raw_df, state, country)
 
