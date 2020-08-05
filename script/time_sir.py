@@ -113,13 +113,3 @@ class TimeSIR(BaseModel):
         }
 
         return result
-
-        # plt.plot(range(len(I_pred)-1), I_pred[1:], '*-', label=r'$\hat{I}(t)$', color='darkorange')
-        # plt.plot(range(len(I_pred)-1), R_pred[1:], '*-', label=r'$\hat{R}(t)$', color='limegreen')
-        # plt.plot(range(len(val_params['I'])), val_params['I'], '--', label=r'$I(t)$', color='chocolate')
-        # plt.plot(range(len(val_params['I'])), val_params['R'], '--', label=r'$R(t)$', color='darkgreen')
-        # plt.xlabel('Day')
-        # plt.ylabel('Person')
-        # plt.title('Time evolution of the time-dependent SIR model.')
-        # plt.legend()
-        # plt.show()

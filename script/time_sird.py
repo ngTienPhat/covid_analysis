@@ -65,8 +65,8 @@ class TimeSIRD(BaseModel):
         self.x_gamma, self.y_gamma = data_split(self.gamma, cfg.model.orders_gamma, cfg.model.start_gamma)
 
     def fit_linear(self, X, y, variable="gamma"):
-        self.linear_models[variable].fit(X, y)
-        # self.linear_models[variable] = ridge(X, y)
+        # self.linear_models[variable].fit(X, y)
+        self.linear_models[variable] = ridge(X, y)
 
     def evaluate_linear(self, X_test, y_test, variable="gamma"):
         y_hat = self.linear_models[variable].predict(X_test)
@@ -135,14 +135,4 @@ class TimeSIRD(BaseModel):
         }
 
         return result
-        '''
-        plt.plot(range(len(I_pred)-1), I_pred[1:], '*-', label=r'$\hat{I}(t)$', color='darkorange')
-        plt.plot(range(len(I_pred)-1), R_pred[1:], '*-', label=r'$\hat{R}(t)$', color='limegreen')
-        plt.plot(range(len(val_params['I'])), val_params['I'], '--', label=r'$I(t)$', color='chocolate')
-        plt.plot(range(len(val_params['I'])), val_params['R'], '--', label=r'$R(t)$', color='darkgreen')
-        plt.xlabel('Day')
-        plt.ylabel('Person')
-        plt.title('Time evolution of the time-dependent SIR model.')
-        plt.legend()
-        plt.show()
-        '''
+       

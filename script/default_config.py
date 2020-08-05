@@ -1,5 +1,26 @@
 from yacs.config import CfgNode as CN
 
+population = {
+    'US': {
+        'Texas': 29087070,
+        'California': 39747267,
+        'New York': 19491339,
+        'Pennsylvania': 12813969,
+        'Illinois': 12700381,
+        'Ohio': 11718568,
+        'Georgia': 10627767,
+        'Michigan': 10020472,
+    },
+    'China':{
+        'Beijing': 11716620,
+        'Tianjin': 11090314,
+        'Chongqing': 7457600,
+        'Jilin': 1881977,
+        'Shanghai': 22315474,
+        'Zhejiang': 632552,
+    },
+}
+
 def get_default_config():
     cfg = CN() 
 
@@ -11,21 +32,8 @@ def get_default_config():
     # data
     cfg.data.root = "dataset/csse_combine_state"    
 
-    cfg.population = CN()
+    # cfg.population = CN()
 
-    # -----------------------POPULATION--------------------------------
-    # US
-    cfg.population.texas = 29087070
-    cfg.population.california = 39747267
-    cfg.population.florida = 21646155
-    cfg.population.new_york = 19491339
-    cfg.population.pennsylvania = 12813969
-    cfg.population.illinois = 12700381
-    cfg.population.ohio = 11718568
-    cfg.population.georgia = 10627767
-    cfg.population.michigan = 10020472
-
-    # CHINA
 
 
     # -----------------------Time_SIR--------------------------------

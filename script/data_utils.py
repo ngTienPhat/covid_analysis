@@ -19,8 +19,8 @@ def data_split(x, orders, start):
     
     return x_train, y_train
 
-def prepare_data(arr_active, arr_confirm, arr_death, arr_recover, population, is_have_death):
-    pops = np.array(len(arr_active)*[population], dtype=np.float)
+def prepare_data(arr_confirm, arr_death, arr_recover, population, is_have_death=False):
+    pops = np.array(len(arr_confirm)*[population], dtype=np.float)
 
     I, R, D, S, gamma, beta, delta = 0, 0, 0, 0, 0, 0, 0
   
@@ -29,8 +29,9 @@ def prepare_data(arr_active, arr_confirm, arr_death, arr_recover, population, is
         R = arr_recover
         D = arr_death
         S = pops - I - R - D
+        
         gamma = (R[1:] - R[:-1])/I[:-1]
-        beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1]) / (I[:-1]*S[:-1])
+        beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1] + D[1:] - D[:-1]) / (I[:-1]*S[:-1])
         delta = (D[1:] - D[:-1])/I[:-1]
     else:
         I = arr_confirm - arr_recover - arr_death
@@ -40,7 +41,8 @@ def prepare_data(arr_active, arr_confirm, arr_death, arr_recover, population, is
         gamma = (R[1:] - R[:-1])/I[:-1]
         beta = pops[:-1]*(I[1:]-I[:-1] + R[1:]-R[:-1]) / (I[:-1]*S[:-1])
         delta = 0
-  
+    
+
     params = {
         'I': I, 'R': R, 'S': S, 'gamma': gamma, 'beta': beta, 'population' : population, 'D': D, 'delta': delta
     }
@@ -50,7 +52,8 @@ def visualize_result(all_params, pred_result, is_have_death = False, log = False
   is_print = False, output_path = None):
     I_pred = pred_result['I_pred']
     R_pred = pred_result['R_pred']
-    D_pred = pred_result['D_pred']
+    if is_have_death:
+        D_pred = pred_result['D_pred']
     n_pred = len(I_pred)
 
     I_all = all_params['I']
