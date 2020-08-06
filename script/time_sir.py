@@ -54,8 +54,10 @@ class TimeSIR(BaseModel):
         self.x_gamma, self.y_gamma = data_split(self.gamma, cfg.model.orders_gamma, cfg.model.start_gamma)
 
     def fit_linear(self, X, y, variable="gamma"):
-        self.linear_models[variable].fit(X, y)
-        # self.linear_models[variable] = ridge(X, y)
+        if self.cfg.model.timeSIR_grid:
+            self.linear_models[variable] = ridge(X, y)
+        else:
+            self.linear_models[variable].fit(X, y)
 
     def evaluate_linear(self, X_test, y_test, variable="gamma"):
         y_hat = self.linear_models[variable].predict(X_test)

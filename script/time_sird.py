@@ -65,8 +65,11 @@ class TimeSIRD(BaseModel):
         self.x_gamma, self.y_gamma = data_split(self.gamma, cfg.model.orders_gamma, cfg.model.start_gamma)
 
     def fit_linear(self, X, y, variable="gamma"):
-        self.linear_models[variable].fit(X, y)
-        # self.linear_models[variable] = ridge(X, y)
+        if self.cfg.model.timeSIRD_grid:
+            self.linear_models[variable] = ridge(X, y)
+        else:
+            self.linear_models[variable].fit(X, y)
+        
 
     def evaluate_linear(self, X_test, y_test, variable="gamma"):
         y_hat = self.linear_models[variable].predict(X_test)
@@ -81,7 +84,7 @@ class TimeSIRD(BaseModel):
         self.fit_linear(self.x_gamma, self.y_gamma, "gamma")
         print(f"finish training gamma")
 
-        self.fit_linear(self.x_gamma, self.y_gamma, "delta")
+        self.fit_linear(self.x_delta, self.y_delta, "delta")
         print(f"finish training delta")
 
     def predict(self, val_params):

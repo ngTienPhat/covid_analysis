@@ -1,14 +1,12 @@
 from yacs.config import CfgNode as CN
 
+SEIR_STATE = ['Tianjin', 'Chongqing', 'Jilin', 'Zhejiang']
 population = {
     'US': {
         'Texas': 29087070,
-        'California': 39747267,
         'New York': 19491339,
         'Pennsylvania': 12813969,
-        'Illinois': 12700381,
         'Ohio': 11718568,
-        'Georgia': 10627767,
         'Michigan': 10020472,
     },
     'China':{
@@ -18,6 +16,7 @@ population = {
         'Jilin': 1881977,
         'Shanghai': 22315474,
         'Zhejiang': 632552,
+        # 'Hubei': 58520000
     },
 }
 
@@ -31,13 +30,16 @@ def get_default_config():
     
     # data
     cfg.data.root = "dataset/csse_combine_state"    
-
+    cfg.data.save_path = "RESULT" ## For example: We run timeSIR data of "US/Texas", results will be saved under "RESULT/US/Texas_timeSIR"
     # cfg.population = CN()
 
 
 
     # -----------------------Time_SIR--------------------------------
     cfg.model=CN()
+    cfg.model.timeSIR_grid = True
+    cfg.model.timeSIRD_grid = True
+
     # Learning params:
     cfg.model.orders_beta = 2
     cfg.model.orders_gamma = 2
