@@ -126,6 +126,8 @@ def test_basic_SIRD(raw_df, attribute2fix: str, state='Texas', country='US'):
 
 
 def test_data(country, state):
+    if state in SEIR_STATE:
+        return
     train_df, val_df, raw_df = load_data(country=country, state = state)
 
     raw_params = prepare_data(
@@ -134,25 +136,37 @@ def test_data(country, state):
         raw_df['Recovered'].values,
         population[country][state]
     )
-
+    print()
     print(f'test on {state}')
+
+    # TEST TIME MODELS
     # plot_single_set(raw_params)
     # test_time_SIR(train_df, val_df, raw_df, state, country)
-    # test_time_SIRD(train_df, val_df, raw_df, state, country)
+    test_time_SIRD(train_df, val_df, raw_df, state, country)
 
-    for att in ['I', 'R']:
-        test_basic_SIR(raw_df, att, state, country)
-        test_basic_SIRD(raw_df, att, state, country)
+    # TEST BASIC MODELS
+    # for att in ['I', 'R']:
+    #     test_basic_SIR(raw_df, att, state, country)
+    #     test_basic_SIRD(raw_df, att, state, country)
 
 
 if __name__ == "__main__":
     list_countries = list(population.keys())
 
+    # for country in list_countries:
+    #     for state in population[country].keys():
+    #         train_df, val_df, raw_df = load_data(country=country, state = state)
+    #         raw_params = prepare_data(
+    #             raw_df['Confirmed'].values,
+    #             raw_df['Deaths'].values,
+    #             raw_df['Recovered'].values,
+    #             population[country][state],
+    #             is_have_death=True
+    #         )
+    #         save_dir = os.path.join(cfg.data.save_path+'/input', f'{country}_{state}.jpg')
+    #         plot_single_set(raw_params, x_axis=raw_df['Day'].values, save_dir=save_dir)
+
     for country in list_countries:
-        # if country != 'US': 
-        #     continue
         for state in population[country].keys():
-            # if state in SEIR_STATE or state == 'Texas':
-            #     continue
             test_data(country, state)
  

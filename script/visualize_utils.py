@@ -142,7 +142,7 @@ def visualize_R0_from_all(all_params, pred_result, log = False, save_dir=None, x
     plt.plot(X, [1]*n, '--', label=r'threshold $R_0 (t)$ < 1', color='lightgreen')
     plt.plot(X, R0_raw, '--*', label=r'$R_0 (t)$', color='darkorange')
     plt.plot(X[range(n-n_pred, n)], R0_pred, '--o', label=r'$\hat{R_0}(t)$', color='darkblue')
-    plt.xticks(xticks_ids, X)
+    plt.xticks(xticks_ids, X[xticks_ids])
     
     plt.xlabel('Date')
     plt.ylabel('Reproduction number $R_0 (t)$')
@@ -200,7 +200,7 @@ def visualize_result(all_params, pred_result, is_have_death = False, log = False
         plt.plot(X[range(n)], D_all, '--', label=r'$D(t)$', color='black')
         plt.plot(X[range(n-n_pred, n)], D_pred, '--+', label=r'$\hat{D}(t)$', color='purple')
 
-    plt.xticks(xticks_ids, X)
+    plt.xticks(xticks_ids, X[xticks_ids])
     plt.xlabel('Day')
     plt.ylabel('Person')
     plt.title('Time evolution of the time-dependent SIR model.')
@@ -240,7 +240,7 @@ def plot_single_set(set_params, x_axis=None, save_dir=None):
 
     plt.xlabel('Day')
     plt.ylabel('Person')
-    plt.xticks(xticks_ids, x_axis)
+    plt.xticks(xticks_ids, x_axis[xticks_ids])
     plt.legend()
 
     if save_dir is not None:
