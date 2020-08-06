@@ -10,6 +10,7 @@ from time_sird import TimeSIRD
 from data_utils import train_test_split, prepare_data, remove_year
 from default_config import get_default_config, population, SEIR_STATE
 from basic_sir import BasicSIR
+from basic_sird import BasicSIRD
 from visualize_utils import visualize_all_result, visualize_result, plot_single_set, \
                             visualize_error_rate, visualize_basic_result, visualize_R0_from_all
 
@@ -92,21 +93,46 @@ def test_basic_SIR(raw_df, attribute2fix: str, state='Texas', country='US'):
 
     basic_sir = BasicSIR(cfg, raw_params)
     res = basic_sir.fit_single_attribute(attribute='R', visualize=False)
-    print("finisi curve fitting")
+    print("finish curve fitting")
     val_params = {'I': basic_sir.I, 'R': basic_sir.R}
     x_axis=raw_df['Day'].values
 
     visualize_basic_result(val_params, res, x_axis, save_dir)
+
+def test_basic_SIRD(raw_df, attribute2fix: str, state='Texas', country='US'):
+    '''
+        attribute2fix: ['I', 'R']
+    '''
+    print(f"--- Basic SIRD ---")
+    raw_params = prepare_data(
+        raw_df['Confirmed'].values,
+        raw_df['Deaths'].values,
+        raw_df['Recovered'].values,
+        population[country][state],
+        is_have_death=True
+    )
+
+    filename = f"{country}/{state}_basicSIRD"
+    save_dir = os.path.join(cfg.data.save_path, filename) 
+
+    basic_sir = BasicSIRD(cfg, raw_params)
+    res = basic_sir.fit_single_attribute(attribute='I', visualize=True)
+    print("finish curve fitting")
+    val_params = {'I': basic_sir.I, 'R': basic_sir.R, 'D': basic_sir.D}
+    x_axis=raw_df['Day'].values
+
+    visualize_basic_result(val_params, res, x_axis, save_dir)
+
 
 if __name__ == "__main__":
     list_countries = list(population.keys())
     # country = 'US'
     # state = 'Texas'
     for country in list_countries:
-        if country == 'US': 
+        if country != 'US': 
             continue
         for state in population[country].keys():
-            if state in SEIR_STATE :#or state != 'Texas':
+            if state in SEIR_STATE or state == 'Texas':
                 continue
             train_df, val_df, raw_df = load_data(country=country, state = state)
 
@@ -119,9 +145,10 @@ if __name__ == "__main__":
             
             print(f'test on {state}')
             # plot_single_set(raw_params)
-            test_time_SIR(train_df, val_df, raw_df, state, country)
-            test_time_SIRD(train_df, val_df, raw_df, state, country)
-            test_basic_SIR(raw_df, 'R', state, country)
+            # test_time_SIR(train_df, val_df, raw_df, state, country)
+            # test_time_SIRD(train_df, val_df, raw_df, state, country)
+            # test_basic_SIR(raw_df, 'R', state, country)
+            test_basic_SIRD(raw_df, 'R', state, country)
 
 
 

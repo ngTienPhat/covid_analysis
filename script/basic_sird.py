@@ -7,11 +7,11 @@ from scipy import integrate, optimize
 from default_model import BaseModel
 from data_utils import data_split
 
-class BasicSIR(BaseModel):
+class BasicSIRD(BaseModel):
     valid_params = ['I', 'R']
 
     def __init__(self, cfg, params):
-        super(BasicSIR, self).__init__(cfg, params)
+        super(BasicSIRD, self).__init__(cfg, params)
 
         self.final_beta = None 
         self.final_gamma = None 
@@ -57,9 +57,10 @@ class BasicSIR(BaseModel):
         if save_dir is not None:
             save_dir = os.path.join(save_dir, 'trend_prediction.jpg')
 
-        I_pred = integrate.odeint(sir_model, (S0, I0, R0, D0), X, args=(self.final_beta, self.final_gamma))[:, 1]
-        R_pred = integrate.odeint(sir_model, (S0, I0, R0, D0), X, args=(self.final_beta, self.final_gamma))[:, 2]
-        D_pred = integrate.odeint(sir_model, (S0, I0, R0, D0), X, args=(self.final_beta, self.final_gamma))[:, 3]
+        I_pred = integrate.odeint(sir_model, (S0, I0, R0, D0), X, args=tuple(fitted_params))[:, 1]
+        R_pred = integrate.odeint(sir_model, (S0, I0, R0, D0), X, args=tuple(fitted_params))[:, 2]
+        D_pred = integrate.odeint(sir_model, (S0, I0, R0, D0), X, args=tuple(fitted_params))[:, 3]
+        
         if visualize:
             plt.plot(X, self.I, label='$I(t)$', color='orange')
             plt.plot(X, I_pred, label='$\hat{I}(t)$', color='blue')
@@ -67,8 +68,8 @@ class BasicSIR(BaseModel):
             plt.plot(X, self.R, label='$R(t)$', color='limegreen')
             plt.plot(X, R_pred, label='$\hat{R}(t)$', color='red')
 
-            plt.plot(X, self.D, label='$D(t)$', color='limegreen')
-            plt.plot(X, D_pred, label='$\hat{D}(t)$', color='red')
+            plt.plot(X, self.D, label='$D(t)$', color='darkgreen')
+            plt.plot(X, D_pred, label='$\hat{D}(t)$', color='pink')
             
             plt.legend()
             plt.show()
