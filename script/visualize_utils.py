@@ -44,9 +44,9 @@ def plot_pair_lines(y_pred, y_true, pred_label, true_label, title, X=None,
     y_range = np.arange(-max_val, max_val+interval_width, interval_width)
 
     sns.lineplot(X, y_pred, marker='o', color=pred_color, label=pred_label)
-    pR = sns.lineplot(X, y_true, marker='o', color=true_color, label=true_label)
-    pR.set(yticks=y_range)
-    plt.xticks(xticks_ids, X)
+    sns.lineplot(X, y_true, marker='o', color=true_color, label=true_label)
+    plt.ylim((-max_val, max_val))
+    plt.xticks(xticks_ids, X[xticks_ids])
     plt.title(title)
     plt.legend()
 
@@ -57,7 +57,7 @@ def plot_pair_lines(y_pred, y_true, pred_label, true_label, title, X=None,
     else:
         plt.show()
     
-def visualize_error_rate(val_params, pred_results, x_axis=None, save_dir=None):
+def visualize_error_rate(val_params, pred_results, x_axis=None, save_dir=None, att=None):
     # plt.figure(figsize=(8,8))
     I_pred = pred_results['I_pred']
     R_pred = pred_results['R_pred']
@@ -68,7 +68,10 @@ def visualize_error_rate(val_params, pred_results, x_axis=None, save_dir=None):
     R_error_rate = error_rate(R_pred, R_val)
 
     if save_dir is not None:
-        save_dir = osp.join(save_dir, "error_rate.jpg")
+        if att is not None:
+            save_dir = osp.join(save_dir, f"error_rate_{att}.jpg")
+        else:
+            save_dir = osp.join(save_dir, f"error_rate.jpg")
 
     plot_pair_lines(
         y_pred = I_error_rate,
@@ -213,24 +216,45 @@ def visualize_result(all_params, pred_result, is_have_death = False, log = False
     else:
         plt.show()
 
-def plot_single_set(set_params):
+def plot_single_set(set_params, x_axis=None, save_dir=None):
+    plt.figure(figsize=(25,8))
+
     I = set_params['I']
     R = set_params['R']
+    D = set_params['D']
 
     S = np.log(np.array(set_params['S']))
     # print(S[:10])
     n = len(I)
 
+    if x_axis is None:
+        x_axis = np.arange(len(n))
+    else:
+        xticks_ids = get_xticks_ids(x_axis)
+
     plt.plot(range(n), I, '--', label=r'$I(t)$', color='darkorange')
-    plt.plot(range(n), R, '--', label=r'$R(t)$', color='limegreen')
-    # plt.plot(range(n), S, '--', label=r'$S(t)$', color='blue')
+    plt.plot(range(n), R, '--', label=r'$R(t)$', color='green')
+
+    if isinstance(D, list) or isinstance(D, np.ndarray):
+        plt.plot(range(n), D, '--', label=r'$D(t)$', color='blue')
 
     plt.xlabel('Day')
     plt.ylabel('Person')
+    plt.xticks(xticks_ids, x_axis)
     plt.legend()
-    plt.show()
 
-def visualize_basic_result(val_params, pred_params, x_axis=None, save_dir=None):
+    if save_dir is not None:
+        if not save_dir.endswith(".jpg"):
+            mkdir_if_not_exist(save_dir)
+            save_dir = os.path.join(save_dir, 'input.jpg')
+        plt.savefig(save_dir)
+        plt.clf()
+        
+    else:
+        plt.show()
+    
+
+def visualize_basic_result(val_params, pred_params, x_axis=None, save_dir=None, att2fix='I'):
     mkdir_if_not_exist(save_dir)
     plt.figure(figsize=(25,8))
 
@@ -239,7 +263,7 @@ def visualize_basic_result(val_params, pred_params, x_axis=None, save_dir=None):
         y_pred = pred_params[param+'_pred']
         
         if save_dir is not None:
-            save_file = osp.join(save_dir, f"{param}.jpg")
+            save_file = osp.join(save_dir, f"{param}_{att2fix}.jpg")
         plot_pair_lines(
             y_pred,
             y_true,
@@ -250,4 +274,4 @@ def visualize_basic_result(val_params, pred_params, x_axis=None, save_dir=None):
             X = x_axis
         )
     
-    visualize_error_rate(val_params, pred_params, x_axis, save_dir)
+    visualize_error_rate(val_params, pred_params, x_axis, save_dir, att2fix)

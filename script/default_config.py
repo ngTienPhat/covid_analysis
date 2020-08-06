@@ -34,11 +34,10 @@ def get_default_config():
     # cfg.population = CN()
 
 
-
     # -----------------------Time_SIR--------------------------------
     cfg.model=CN()
-    cfg.model.timeSIR_grid = True
-    cfg.model.timeSIRD_grid = True
+    cfg.model.timeSIR_grid = True #Use grid search to train Ridge Regression or not
+    cfg.model.timeSIRD_grid = True#Use grid search to train Ridge Regression or not
 
     # Learning params:
     cfg.model.orders_beta = 2

@@ -92,12 +92,12 @@ def test_basic_SIR(raw_df, attribute2fix: str, state='Texas', country='US'):
     save_dir = os.path.join(cfg.data.save_path, filename) 
 
     basic_sir = BasicSIR(cfg, raw_params)
-    res = basic_sir.fit_single_attribute(attribute='R', visualize=False)
+    res = basic_sir.fit_single_attribute(attribute=attribute2fix, visualize=False)
     print("finish curve fitting")
     val_params = {'I': basic_sir.I, 'R': basic_sir.R}
     x_axis=raw_df['Day'].values
 
-    visualize_basic_result(val_params, res, x_axis, save_dir)
+    visualize_basic_result(val_params, res, x_axis, save_dir, attribute2fix)
 
 def test_basic_SIRD(raw_df, attribute2fix: str, state='Texas', country='US'):
     '''
@@ -116,57 +116,43 @@ def test_basic_SIRD(raw_df, attribute2fix: str, state='Texas', country='US'):
     save_dir = os.path.join(cfg.data.save_path, filename) 
 
     basic_sir = BasicSIRD(cfg, raw_params)
-    res = basic_sir.fit_single_attribute(attribute='I', visualize=True)
+    res = basic_sir.fit_single_attribute(attribute=attribute2fix, visualize=False)
     print("finish curve fitting")
     val_params = {'I': basic_sir.I, 'R': basic_sir.R, 'D': basic_sir.D}
     x_axis=raw_df['Day'].values
 
-    visualize_basic_result(val_params, res, x_axis, save_dir)
+    plot_single_set(raw_params, x_axis, save_dir)
+    visualize_basic_result(val_params, res, x_axis, save_dir, attribute2fix)
+
+
+def test_data(country, state):
+    train_df, val_df, raw_df = load_data(country=country, state = state)
+
+    raw_params = prepare_data(
+        raw_df['Confirmed'].values,
+        raw_df['Deaths'].values,
+        raw_df['Recovered'].values,
+        population[country][state]
+    )
+
+    print(f'test on {state}')
+    # plot_single_set(raw_params)
+    # test_time_SIR(train_df, val_df, raw_df, state, country)
+    # test_time_SIRD(train_df, val_df, raw_df, state, country)
+
+    for att in ['I', 'R']:
+        test_basic_SIR(raw_df, att, state, country)
+        test_basic_SIRD(raw_df, att, state, country)
 
 
 if __name__ == "__main__":
     list_countries = list(population.keys())
-    # country = 'US'
-    # state = 'Texas'
+
     for country in list_countries:
-        if country != 'US': 
-            continue
+        # if country != 'US': 
+        #     continue
         for state in population[country].keys():
-            if state in SEIR_STATE or state == 'Texas':
-                continue
-            train_df, val_df, raw_df = load_data(country=country, state = state)
-
-            raw_params = prepare_data(
-                raw_df['Confirmed'].values,
-                raw_df['Deaths'].values,
-                raw_df['Recovered'].values,
-                population[country][state]
-            )
-            
-            print(f'test on {state}')
-            # plot_single_set(raw_params)
-            # test_time_SIR(train_df, val_df, raw_df, state, country)
-            # test_time_SIRD(train_df, val_df, raw_df, state, country)
-            # test_basic_SIR(raw_df, 'R', state, country)
-            test_basic_SIRD(raw_df, 'R', state, country)
-
-
-
-    ## A. test time-SIR 
-    # test_time_SIR(train_df, val_df, raw_df, state, country)
-
-    # for state in population[country].keys():
-    #     train_df, val_df, raw_df = load_data(country=country, STATE = state)
-        
-    #     print(f'test on {state}')
-
-    #     ## A. test time-SIR 
-    #     test_time_SIR(train_df, val_df, raw_df, state, country)
-        
-
-    #     ## B. test basic SIR with curve fit:
-    #     # test_basic_SIR('I')
-    #     # test_basic_SIR(raw_df, 'R')
-
-    #     ## C. test time-SIRD:
-    #     # test_time_SIRD(train_df, val_df, raw_df, STATE = state)
+            # if state in SEIR_STATE or state == 'Texas':
+            #     continue
+            test_data(country, state)
+ 
