@@ -16,7 +16,6 @@ population = {
         'Jilin': 1881977,
         'Shanghai': 22315474,
         'Zhejiang': 632552,
-        # 'Hubei': 58520000
     },
 }
 
@@ -29,7 +28,7 @@ def get_default_config():
     cfg.data = CN()
     
     # data
-    cfg.data.root = "dataset/csse_combine_state"    
+    cfg.data.root = "dataset/csse_combine_state" 
     cfg.data.save_path = "RESULT" ## For example: We run timeSIR data of "US/Texas", results will be saved under "RESULT/US/Texas_timeSIR"
     # cfg.population = CN()
 
@@ -41,7 +40,7 @@ def get_default_config():
     # -----------------------Time_SIR--------------------------------
     
     cfg.model.timeSIR_grid = True #Use grid search to train Ridge Regression or not
-    cfg.model.timeSIRD_grid = True#Use grid search to train Ridge Regression or not
+    cfg.model.timeSIRD_grid = True #Use grid search to train Ridge Regression or not
 
     # Learning params:
     cfg.model.orders_beta = 2
