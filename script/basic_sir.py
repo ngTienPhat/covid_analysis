@@ -38,6 +38,9 @@ class BasicSIR(BaseModel):
         n = self.n
         X  = np.arange(len(self.I))
         
+        sigma = self.cfg.model.curvefit_sigma_rate*pred_y
+        sigma[sigma < 2] = 2
+
         def sir_model(f, x, beta, gamma):
             s0, i0, r0 = f
             s = -beta*s0*i0/n
@@ -48,7 +51,7 @@ class BasicSIR(BaseModel):
         def fit_odeint(x, beta, gamma):
             return integrate.odeint(sir_model, (S0, I0, R0), x, args=(beta, gamma))[:, att_idx]
 
-        fitted_params, std_params = optimize.curve_fit(fit_odeint, X, pred_y)
+        fitted_params, std_params = optimize.curve_fit(fit_odeint, X, pred_y, sigma = sigma)
         self.final_beta, self.final_gamma = fitted_params
 
         if save_dir is not None:

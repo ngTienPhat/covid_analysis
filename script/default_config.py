@@ -34,8 +34,12 @@ def get_default_config():
     # cfg.population = CN()
 
 
-    # -----------------------Time_SIR--------------------------------
     cfg.model=CN()
+    # -----------------------Basic_SIR--------------------------------
+    cfg.model.curvefit_sigma_rate = 0.15
+
+    # -----------------------Time_SIR--------------------------------
+    
     cfg.model.timeSIR_grid = True #Use grid search to train Ridge Regression or not
     cfg.model.timeSIRD_grid = True#Use grid search to train Ridge Regression or not
 

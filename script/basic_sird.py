@@ -47,11 +47,14 @@ class BasicSIRD(BaseModel):
             d = alpha*i0
             i = -(s + r + d)
             return s, i, r, d
-    
+
+        sigma = self.cfg.model.curvefit_sigma_rate*pred_y
+        sigma[sigma < 2] = 2
+
         def fit_odeint(x, beta, gamma, alpha):
             return integrate.odeint(sir_model, (S0, I0, R0, D0), x, args=(beta, gamma, alpha))[:, att_idx]
 
-        fitted_params, std_params = optimize.curve_fit(fit_odeint, X, pred_y)
+        fitted_params, std_params = optimize.curve_fit(fit_odeint, X, pred_y, sigma=sigma)
         self.final_beta, self.final_gamma, self.final_alpha = fitted_params
 
         if save_dir is not None:

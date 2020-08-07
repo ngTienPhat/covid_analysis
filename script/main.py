@@ -88,7 +88,7 @@ def test_basic_SIR(raw_df, attribute2fix: str, state='Texas', country='US'):
         population[country][state]
     )
 
-    filename = f"{country}/{state}_basicSIR"
+    filename = f"{country}/{state}_basicSIR_{cfg.model.curvefit_sigma_rate}"
     save_dir = os.path.join(cfg.data.save_path, filename) 
 
     basic_sir = BasicSIR(cfg, raw_params)
@@ -112,7 +112,7 @@ def test_basic_SIRD(raw_df, attribute2fix: str, state='Texas', country='US'):
         is_have_death=True
     )
 
-    filename = f"{country}/{state}_basicSIRD"
+    filename = f"{country}/{state}_basicSIRD_{cfg.model.curvefit_sigma_rate}"
     save_dir = os.path.join(cfg.data.save_path, filename) 
 
     basic_sir = BasicSIRD(cfg, raw_params)
@@ -142,12 +142,12 @@ def test_data(country, state):
     # TEST TIME MODELS
     # plot_single_set(raw_params)
     # test_time_SIR(train_df, val_df, raw_df, state, country)
-    test_time_SIRD(train_df, val_df, raw_df, state, country)
+    # test_time_SIRD(train_df, val_df, raw_df, state, country)
 
     # TEST BASIC MODELS
-    # for att in ['I', 'R']:
-    #     test_basic_SIR(raw_df, att, state, country)
-    #     test_basic_SIRD(raw_df, att, state, country)
+    for att in ['I', 'R']:
+        test_basic_SIR(raw_df, att, state, country)
+        test_basic_SIRD(raw_df, att, state, country)
 
 
 if __name__ == "__main__":
