@@ -1,5 +1,8 @@
 dataset
 sample*
 _*
-.*
 */.*
+.*
+res
+script/__*
+script/RESULT

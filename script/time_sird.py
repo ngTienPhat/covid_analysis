@@ -65,8 +65,11 @@ class TimeSIRD(BaseModel):
         self.x_gamma, self.y_gamma = data_split(self.gamma, cfg.model.orders_gamma, cfg.model.start_gamma)
 
     def fit_linear(self, X, y, variable="gamma"):
-        self.linear_models[variable].fit(X, y)
-        # self.linear_models[variable] = ridge(X, y)
+        if self.cfg.model.timeSIRD_grid:
+            self.linear_models[variable] = ridge(X, y)
+        else:
+            self.linear_models[variable].fit(X, y)
+        
 
     def evaluate_linear(self, X_test, y_test, variable="gamma"):
         y_hat = self.linear_models[variable].predict(X_test)
@@ -81,7 +84,7 @@ class TimeSIRD(BaseModel):
         self.fit_linear(self.x_gamma, self.y_gamma, "gamma")
         print(f"finish training gamma")
 
-        self.fit_linear(self.x_gamma, self.y_gamma, "delta")
+        self.fit_linear(self.x_delta, self.y_delta, "delta")
         print(f"finish training delta")
 
     def predict(self, val_params):
@@ -105,9 +108,9 @@ class TimeSIRD(BaseModel):
             next_gamma = self.linear_models['gamma'].predict(pred_gamma[-cfg.model.orders_gamma:].reshape((1,-1)))[0]
             next_delta = self.linear_models['delta'].predict(pred_delta[-cfg.model.orders_delta:].reshape((1,-1)))[0]
 
-            next_beta = max(next_beta, 0)
-            next_gamma = max(next_gamma, 0)
-            next_delta = max(next_delta, 0)
+            next_beta = max(next_beta, 0.001)
+            next_gamma = max(next_gamma, 0.001)
+            next_delta = max(next_delta, 0.001)
 
             next_S = ((-next_beta * S_pred[-1] * I_pred[-1])/self.n) + S_pred[-1]
             # next_I = (1+next_beta-next_gamma)*I_pred[-1]
@@ -120,9 +123,9 @@ class TimeSIRD(BaseModel):
             R_pred.append(next_R)
             D_pred.append(next_D)
 
-            np.insert(pred_beta, -1, next_beta)
-            np.insert(pred_gamma, -1, next_gamma)
-            np.insert(pred_delta, -1, next_delta)
+            pred_beta = np.insert(pred_beta, len(pred_beta), next_beta)
+            pred_gamma = np.insert(pred_gamma, len(pred_gamma), next_gamma)
+            pred_delta = np.insert(pred_delta, len(pred_delta), next_delta)
 
             cnt_day += 1
 
@@ -131,18 +134,11 @@ class TimeSIRD(BaseModel):
             "I_pred": I_pred[1:],
             "R_pred": R_pred[1:],
             "D_pred": D_pred[1:],
+            "beta_pred": pred_beta[cfg.model.orders_beta:-1],
+            "gamma_pred": pred_gamma[cfg.model.orders_gamma:-1],
+            "delta_pred": pred_delta[cfg.model.orders_gamma:-1],
             "turning_point": turning_point
         }
 
         return result
-        '''
-        plt.plot(range(len(I_pred)-1), I_pred[1:], '*-', label=r'$\hat{I}(t)$', color='darkorange')
-        plt.plot(range(len(I_pred)-1), R_pred[1:], '*-', label=r'$\hat{R}(t)$', color='limegreen')
-        plt.plot(range(len(val_params['I'])), val_params['I'], '--', label=r'$I(t)$', color='chocolate')
-        plt.plot(range(len(val_params['I'])), val_params['R'], '--', label=r'$R(t)$', color='darkgreen')
-        plt.xlabel('Day')
-        plt.ylabel('Person')
-        plt.title('Time evolution of the time-dependent SIR model.')
-        plt.legend()
-        plt.show()
-        '''
+       
