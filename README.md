@@ -8,14 +8,14 @@ In this project, we reviews and run demo SIR, SIRD models on the [covid-19 datas
 - use [default_config.py](script/default_config.py) to change your working directory and dataset path
 - use `load_data` function in [main.py](script/main.py) to change the working dataset (default is Texas)
 - please install `scipy, sklearn and yacs` to run this code
-- extracted for each states per day: [ggdrive](https://drive.google.com/drive/folders/1epFqF8rjD5eHSUWS3yQHufah6boR48cV?usp=sharing)
+
 
 **Models**
-- the *basic* model is trained using Chi-squared minimization by `scipy curve_fit` library
-- the *time-* model is trained using grid search for the Ridge Regression's parameters
+- the *basic* models are trained using Chi-squared minimization by `curve_fit` from `scipy` library.
+- the *time* models are trained using grid search for the Ridge Regression's hyperparameters.
 
 **Run**
-- Use the main funciton in `main.py` to run the model
+- Use the main funciton in [main](script/main.py) to run the model
 
 **Result**
 Here we show some results when run SIR model on two different training types on Texas dataset:
